@@ -2,7 +2,7 @@
 #include "SignalStorage.hpp"
 
 enum MorseStates {
-  NULL = -1,
+  EMPTY = -1,
   DIT,
   DAH
 };
@@ -11,19 +11,63 @@ template < unsigned int PASSWORD_LENGTH >
 
 class MorseInterpreter {
   SignalStorage::Signals signals;
+  float ditDahThreshold;
+
+  struct MorsePW {
+    MorseStates arr[PASSWORD_LENGTH];
+  };
 
 public:
-  MorseInterpreter(SignalStorage signalStorage) :
-    signals(signalStorage.getSignals())
+  MorseInterpreter(SignalStorage signalStorage, float ditDahThreshold) :
+    signals(signalStorage.getSignals()),
+    ditDahThreshold(ditDahThreshold)
   {
   }
 
-  bool comparePW(MorseStates correctPW) {
+  bool comparePW(MorsePW correctPW[]) {
+    MorsePW inputPW[] = getInputPW(correctPW);
 
+    bool passwordCorrect = true;
+
+    for (unsigned int i=0; i < PASSWORD_LENGTH; i++) {
+      if (inputPW != correctPW) {
+        passwordCorrect = false;
+      }
+    }
+
+    return passwordCorrect;
   }
 
 private:
-  unsigned int avSignalLength(unsigned int ditCount) {
+  MorsePW getInputPW(MorsePW correctPW[]) {
+    unsigned int ditCount = getDitCount(correctPW);
+    unsigned int avSignalLength = getAvSignalLength(ditCount);
+
+    MorsePW returnPW = MorsePW{};
+    for (unsigned int i = 0; i < PASSWORD_LENGTH; i++) {
+      if (signals.arr[i] < (avSignalLength - (ditDahThreshold * avSignalLength))) {
+        returnPW[i] = DIT;
+      } else if (signals.arr[i] > (avSignalLength + (ditDahThreshold * avSignalLength))) {
+        returnPW[i] = DAH;
+      } else {
+        returnPW[i] = EMPTY;
+      }
+    }
+
+    return returnPW;
+  }
+
+  unsigned int getDitCount(MorsePW correctPW[]) {
+    unsigned int ditCount = 0;
+    for (unsigned int i = 0; i < PASSWORD_LENGTH; i++) {
+      if (correctPW.arr[i] == DIT) {
+        ditCount++;
+      }
+    }
+    return ditCount;
+  }
+
+  unsigned int getAvSignalLength(unsigned int ditCount) {
     unsigned int signalsCp[PASSWORD_LENGTH] = signals; // make a copy
     quickSort(&signalsCp[0], &signalsCp[PASSWORD_LENGTH-1]);
 
