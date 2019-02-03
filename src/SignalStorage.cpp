@@ -1,7 +1,11 @@
+#include <limits.h>
+
 template < unsigned int PASSWORD_LENGTH >
 
 class SignalStorage {
-  unsigned int signals[PASSWORD_LENGTH];
+  struct Signals {
+    unsigned int arr[PASSWORD_LENGTH];
+  } signals;
   unsigned int current;
 
 public:
@@ -10,7 +14,7 @@ public:
   }
 
   void reset() {
-    memset(signals, 0, sizeof(signals)); // reset array
+    memset(signals.arr, 0, sizeof(signals.arr)); // reset array
     current = 0;
   }
 
@@ -20,7 +24,11 @@ public:
 
   void push(unsigned int value) {
     if (!full()) {
-      signals[current++] = value;
+      signals.arr[current++] = value;
     }
+  }
+
+  Signals getSignals() {
+    return signals;
   }
 };
