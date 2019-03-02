@@ -1,3 +1,6 @@
+#ifndef OutputInterface_hpp
+#define OutputInterface_hpp
+
 class OutputInterface {
 public:
   OutputInterface(int attachTo, unsigned long grantMs, unsigned long denyMs=0, unsigned long minApproachMs=0, unsigned long rndApproachMs=0, unsigned long rndGrantMS=0);
@@ -15,7 +18,7 @@ private:
   const unsigned long denyMs;
   const unsigned long minApproachMs;
   const unsigned long rndApproachMs;
-  
+
   void wait();
   void approach();
   void grant();
@@ -24,3 +27,5 @@ private:
   void defaultPinAction();
   void grantingPinAction();
 };
+
+#endif

@@ -1,3 +1,4 @@
+//#include "MorseInterpreter.hpp"
 #include <limits.h>
 #include "SignalStorage.hpp"
 
@@ -8,7 +9,6 @@ enum MorseStates {
 };
 
 template < unsigned int PASSWORD_LENGTH >
-
 class MorseInterpreter {
   SignalStorage::Signals signals;
   float ditDahThreshold;
@@ -24,7 +24,7 @@ public:
   {
   }
 
-  bool comparePW(MorsePW correctPW[]) {
+  bool comparePW(MorsePW correctPW) {
     MorsePW inputPW[] = getInputPW(correctPW);
 
     bool passwordCorrect = true;
@@ -39,7 +39,7 @@ public:
   }
 
 private:
-  MorsePW getInputPW(MorsePW correctPW[]) {
+  MorsePW getInputPW(MorsePW correctPW) {
     unsigned int ditCount = getDitCount(correctPW);
     unsigned int avSignalLength = getAvSignalLength(ditCount);
 
@@ -57,7 +57,7 @@ private:
     return returnPW;
   }
 
-  unsigned int getDitCount(MorsePW correctPW[]) {
+  unsigned int getDitCount(MorsePW correctPW) {
     unsigned int ditCount = 0;
     for (unsigned int i = 0; i < PASSWORD_LENGTH; i++) {
       if (correctPW.arr[i] == DIT) {
@@ -103,7 +103,7 @@ private:
     return avSignalLength;
   }
 
-  void quicksort(unsigned int *begin, unsigned int *end) {
+  void quickSort(unsigned int *begin, unsigned int *end) {
     unsigned int *ptr;
     unsigned int *split;
     if (end - begin <= 1)
@@ -117,8 +117,8 @@ private:
       }
     }
     swap(begin, split - 1);
-    quicksort(begin, split - 1);
-    quicksort(split, end);
+    quickSort(begin, split - 1);
+    quickSort(split, end);
   }
 
   void swap(unsigned int *a, unsigned int *b) {

@@ -1,3 +1,6 @@
+#ifndef InputSignal_hpp
+#define InputSignal_hpp
+
 class InputSignal {
 public:
   InputSignal(unsigned int waitMs, unsigned int minEventMs, unsigned int maxSigMs);
@@ -14,3 +17,4 @@ protected:
   bool getSmoothSignal();
   virtual bool getSignal();
 };
+#endif

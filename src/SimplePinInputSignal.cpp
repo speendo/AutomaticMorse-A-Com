@@ -1,7 +1,7 @@
 #include "InputSignal.hpp"
 #include <Arduino.h>
 
-class SimplePinInputSignal : InputSignal {
+class SimplePinInputSignal : public InputSignal {
   const int pin;
 
 public:

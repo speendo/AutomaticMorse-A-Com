@@ -1,3 +1,6 @@
+#ifndef SignalStorage_hpp
+#define SignalStorage_hpp
+
 class SignalStorage {
 public:
   struct Signals {
@@ -13,3 +16,5 @@ public:
 private:
   Signals signals;
 };
+
+#endif
