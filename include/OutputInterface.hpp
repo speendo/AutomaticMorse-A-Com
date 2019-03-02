@@ -19,6 +19,10 @@ private:
   const unsigned long minApproachMs;
   const unsigned long rndApproachMs;
 
+  unsigned long actionStartMs;
+  unsigned long actionRandomMs;
+  bool blockActions;
+
   void wait();
   void approach();
   void grant();

@@ -1,11 +1,11 @@
 #ifndef SignalStorage_hpp
 #define SignalStorage_hpp
 
+#include "AutomaticMorseACom.hpp"
+
 class SignalStorage {
 public:
-  struct Signals {
-    unsigned int arr[];
-  };
+
 
   SignalStorage();
   void reset();
@@ -15,6 +15,7 @@ public:
 
 private:
   Signals signals;
+  unsigned int current;
 };
 
 #endif

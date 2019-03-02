@@ -1,21 +1,10 @@
-//#include "MorseInterpreter.hpp"
-#include <limits.h>
+#include "AutomaticMorseACom.hpp"
 #include "SignalStorage.hpp"
+#include <limits.h>
 
-enum MorseStates {
-  EMPTY = -1,
-  DIT,
-  DAH
-};
-
-template < unsigned int PASSWORD_LENGTH >
 class MorseInterpreter {
-  SignalStorage::Signals signals;
+  Signals signals;
   float ditDahThreshold;
-
-  struct MorsePW {
-    MorseStates arr[PASSWORD_LENGTH];
-  };
 
 public:
   MorseInterpreter(SignalStorage signalStorage, float ditDahThreshold) :
@@ -25,12 +14,12 @@ public:
   }
 
   bool comparePW(MorsePW correctPW) {
-    MorsePW inputPW[] = getInputPW(correctPW);
+    MorsePW inputPW = getInputPW(correctPW);
 
     bool passwordCorrect = true;
 
     for (unsigned int i=0; i < PASSWORD_LENGTH; i++) {
-      if (inputPW != correctPW) {
+      if (inputPW.arr[i] != correctPW.arr[i]) {
         passwordCorrect = false;
       }
     }
@@ -46,11 +35,11 @@ private:
     MorsePW returnPW = MorsePW{};
     for (unsigned int i = 0; i < PASSWORD_LENGTH; i++) {
       if (signals.arr[i] < (avSignalLength - (ditDahThreshold * avSignalLength))) {
-        returnPW[i] = DIT;
+        returnPW.arr[i] = DIT;
       } else if (signals.arr[i] > (avSignalLength + (ditDahThreshold * avSignalLength))) {
-        returnPW[i] = DAH;
+        returnPW.arr[i] = DAH;
       } else {
-        returnPW[i] = EMPTY;
+        returnPW.arr[i] = EMPTY;
       }
     }
 
@@ -68,8 +57,10 @@ private:
   }
 
   unsigned int getAvSignalLength(unsigned int ditCount) {
-    unsigned int signalsCp[PASSWORD_LENGTH] = signals; // make a copy
-    quickSort(&signalsCp[0], &signalsCp[PASSWORD_LENGTH-1]);
+    // make a copy
+    Signals signalsCp = signals;
+
+    quickSort(&signalsCp.arr[0], &signalsCp.arr[PASSWORD_LENGTH-1]);
 
     // generate a border between dits and dahs in user input
     unsigned int avSignalLength;
@@ -86,14 +77,14 @@ private:
       // get average dit length
       unsigned int avDit = 0;
       for (unsigned int i = 0; i < ditCount; i++) {
-        avDit = avDit + signalsCp[i];
+        avDit = avDit + signalsCp.arr[i];
       }
       avDit = avDit / ditCount;
 
       // get average dah length
       unsigned int avDah = 0;
       for (unsigned int i = ditCount; i < PASSWORD_LENGTH; i++) {
-        avDah = avDah + signalsCp[i];
+        avDah = avDah + signalsCp.arr[i];
       }
       avDah = avDah / PASSWORD_LENGTH - ditCount;
 

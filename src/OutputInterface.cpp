@@ -9,16 +9,16 @@ class OutputInterface {
   const unsigned long minApproachMs;
   const unsigned long rndApproachMs;
 
+  unsigned long actionStartMs;
+  unsigned long actionRandomMs;
+  bool blockActions;
+
   enum State {
     WAITING = 0,
     APPROACHING = 1,
     GRANTING = 2,
     DENYING = 3
   } state;
-
-  unsigned long actionStartMs;
-  unsigned long actionRandomMs;
-  bool blockActions;
 
 public:
   OutputInterface(int attachTo, unsigned long grantMs, unsigned long denyMs=0, unsigned long minApproachMs=0, unsigned long rndApproachMs=0, unsigned long rndGrantMS=0) :

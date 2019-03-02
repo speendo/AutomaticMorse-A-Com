@@ -18,12 +18,12 @@ class InputSignal {
   SignalStorage signalStorage;
 
 public:
-  InputSignal(unsigned int waitMs, unsigned int minEventMs, unsigned int maxSigMs, SignalStorage signalStorage) :
+  InputSignal(unsigned int waitMs, unsigned int minEventMs, unsigned int maxSigMs) :
   waitMs(waitMs),
   minEventMs(minEventMs),
-  maxSigMs(maxSigMs),
-  signalStorage(signalStorage)
+  maxSigMs(maxSigMs)
   {
+    signalStorage = SignalStorage();
   }
 
   void setup() {

@@ -1,11 +1,6 @@
-#include <limits.h>
-
-template < unsigned int PASSWORD_LENGTH >
-
+#include "AutomaticMorseACom.hpp"
 class SignalStorage {
-  struct Signals {
-    unsigned int arr[PASSWORD_LENGTH];
-  } signals;
+  Signals signals;
   unsigned int current;
 
 public:
@@ -14,7 +9,9 @@ public:
   }
 
   void reset() {
-    memset(signals.arr, 0, sizeof(signals.arr)); // reset array
+    for(unsigned int i = 0; i < PASSWORD_LENGTH; i++) {
+      signals.arr[i] = 0;
+    }
     current = 0;
   }
 
