@@ -1,3 +1,6 @@
+#ifndef AutomaticMorseACom_hpp
+#define AutomaticMorseACom_hpp
+
 // MorseStates
 
 enum MorseStates {
@@ -17,3 +20,5 @@ struct Signals {
 struct MorsePW {
   MorseStates arr[PASSWORD_LENGTH];
 };
+
+#endif

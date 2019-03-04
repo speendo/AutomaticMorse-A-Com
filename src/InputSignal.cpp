@@ -9,21 +9,22 @@ class InputSignal {
   bool signal;
   bool prevSignal;
   bool error;
+  bool finished;
   bool listening;
 
   unsigned long validEventMs;
 
   unsigned long lastEventMs;
 
-  SignalStorage signalStorage;
+  SignalStorage& signalStorage;
 
 public:
-  InputSignal(unsigned int waitMs, unsigned int minEventMs, unsigned int maxSigMs) :
+  InputSignal(unsigned int waitMs, unsigned int minEventMs, unsigned int maxSigMs, SignalStorage& signalStorage) :
   waitMs(waitMs),
   minEventMs(minEventMs),
-  maxSigMs(maxSigMs)
+  maxSigMs(maxSigMs),
+  signalStorage(signalStorage)
   {
-    signalStorage = SignalStorage();
   }
 
   void setup() {
@@ -31,7 +32,7 @@ public:
   }
 
   void loop() {
-    if (!error) { // when in error state, wait for reset
+    if (!error && !finished) { // when in error or finished state, wait for reset
       prevSignal = signal;
       signal = getSmoothSignal();
 
@@ -54,10 +55,14 @@ public:
         if (signal) { // ... and is pressed now
           validEventMs = millis(); // initialise timer
           listening = true;
-        } else { // and still isn't
+        } else { // and still isn't pressed
           if (listening) {
             if (millis() - validEventMs > waitMs) {
-              error = true; // go in error state because signal pause was too long
+              if (signalStorage.full()) {
+                finished = true; // last command was entered - go in finished state
+              } else {
+                error = true; // go in error state because signal pause was too long
+              }
             }
           }
         }
@@ -69,12 +74,17 @@ public:
     signal = false;
     prevSignal = signal;
     error = false;
+    finished = false;
     listening = false;
     signalStorage.reset();
   }
 
   bool getError() {
     return error;
+  }
+
+  bool getFinished() {
+    return finished;
   }
 
 protected:

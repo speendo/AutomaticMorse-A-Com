@@ -3,19 +3,29 @@
 
 #include "AutomaticMorseACom.hpp"
 #include "SignalStorage.hpp"
+#include "InputSignal.hpp"
 
 class MorseInterpreter {
 
 public:
-  MorseInterpreter(SignalStorage signalStorage, float ditDahThreshold);
-  bool comparePW(MorsePW correctPW);
+  MorseInterpreter(float ditDahThreshold, InputSignal& inputSignal, SignalStorage& signalStorage);
+  void setup();
+  void loop();
+  void reset();
+  bool getPasswordCorrect();
+  bool getCheckFinished();
 
 private:
-  Signals signals;
-  float ditDahThreshold;
+  const float ditDahThreshold;
+  InputSignal& inputSignal;
+  SignalStorage& signalStorage;
 
-  MorsePW getInputPW(MorsePW correctPW);
-  unsigned int getDitCount(MorsePW correctPW);
+  bool passwordCorrect;
+  bool checkFinished;
+
+  void comparePW();
+  MorsePW getInputPW();
+  unsigned int getDitCount();
   unsigned int getAvSignalLength(unsigned int ditCount);
   void quickSort(unsigned int *begin, unsigned int *end);
   void swap(unsigned int *a, unsigned int *b);

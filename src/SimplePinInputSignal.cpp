@@ -5,8 +5,8 @@ class SimplePinInputSignal : public InputSignal {
   const int pin;
 
 public:
-  SimplePinInputSignal(unsigned int waitMs, unsigned int minEventMs, unsigned int maxSigMs, int attachTo) :
-    InputSignal(waitMs, minEventMs, maxSigMs),
+  SimplePinInputSignal(unsigned int waitMs, unsigned int minEventMs, unsigned int maxSigMs, int attachTo, SignalStorage signalStorage) :
+    InputSignal(waitMs, minEventMs, maxSigMs, signalStorage),
     pin(attachTo)
     {
     }

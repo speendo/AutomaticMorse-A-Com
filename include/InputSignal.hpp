@@ -5,11 +5,12 @@
 
 class InputSignal {
 public:
-  InputSignal(unsigned int waitMs, unsigned int minEventMs, unsigned int maxSigMs);
+  InputSignal(unsigned int waitMs, unsigned int minEventMs, unsigned int maxSigMs, SignalStorage& signalStorage);
   void setup();
   void loop();
   void reset();
   bool getError();
+  bool getFinished();
 
 protected:
   const unsigned int waitMs;
@@ -19,6 +20,7 @@ protected:
   bool signal;
   bool prevSignal;
   bool error;
+  bool finished;
   bool listening;
 
   unsigned long validEventMs;

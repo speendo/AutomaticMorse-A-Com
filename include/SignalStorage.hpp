@@ -5,8 +5,6 @@
 
 class SignalStorage {
 public:
-
-
   SignalStorage();
   void reset();
   bool full();

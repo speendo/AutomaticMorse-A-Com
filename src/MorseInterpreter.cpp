@@ -1,35 +1,69 @@
 #include "AutomaticMorseACom.hpp"
 #include "SignalStorage.hpp"
+#include "InputSignal.hpp"
 #include <limits.h>
 
 class MorseInterpreter {
-  Signals signals;
-  float ditDahThreshold;
+  const float ditDahThreshold;
+  InputSignal& inputSignal;
+  SignalStorage& signalStorage;
+
+  bool checkFinished;
+  bool passwordCorrect;
 
 public:
-  MorseInterpreter(SignalStorage signalStorage, float ditDahThreshold) :
-    signals(signalStorage.getSignals()),
-    ditDahThreshold(ditDahThreshold)
+  MorseInterpreter(float ditDahThreshold, InputSignal& inputSignal, SignalStorage& signalStorage) :
+    ditDahThreshold(ditDahThreshold),
+    inputSignal(inputSignal),
+    signalStorage(signalStorage)
   {
   }
 
-  bool comparePW(MorsePW correctPW) {
-    MorsePW inputPW = getInputPW(correctPW);
+  void setup() {
+    reset();
+  }
 
-    bool passwordCorrect = true;
+  void loop() {
+    if (inputSignal.getFinished()) {
+      comparePW();
+      checkFinished = true;
+    }
+  }
+
+  void reset() {
+    passwordCorrect = false;
+    checkFinished = false;
+  }
+
+  bool getCheckFinished() {
+    return checkFinished;
+  }
+
+  bool getPasswordCorrect() { // once this is called, passwordCorrect is reset to false
+    bool returnPasswordCorrect = passwordCorrect;
+    reset();
+    return returnPasswordCorrect;
+  }
+
+
+private:
+  void comparePW() {
+    MorsePW inputPW = getInputPW();
+
+    bool tempPasswordCorrect = true;
 
     for (unsigned int i=0; i < PASSWORD_LENGTH; i++) {
-      if (inputPW.arr[i] != correctPW.arr[i]) {
-        passwordCorrect = false;
+      if (inputPW.arr[i] != PASSWORD[i]) {
+        tempPasswordCorrect = false;
       }
     }
 
-    return passwordCorrect;
+    passwordCorrect = tempPasswordCorrect;
   }
 
-private:
-  MorsePW getInputPW(MorsePW correctPW) {
-    unsigned int ditCount = getDitCount(correctPW);
+  MorsePW getInputPW() {
+    Signals signals = signalStorage.getSignals();
+    unsigned int ditCount = getDitCount();
     unsigned int avSignalLength = getAvSignalLength(ditCount);
 
     MorsePW returnPW = MorsePW{};
@@ -46,10 +80,10 @@ private:
     return returnPW;
   }
 
-  unsigned int getDitCount(MorsePW correctPW) {
+  unsigned int getDitCount() {
     unsigned int ditCount = 0;
     for (unsigned int i = 0; i < PASSWORD_LENGTH; i++) {
-      if (correctPW.arr[i] == DIT) {
+      if (PASSWORD[i] == DIT) {
         ditCount++;
       }
     }
@@ -58,7 +92,7 @@ private:
 
   unsigned int getAvSignalLength(unsigned int ditCount) {
     // make a copy
-    Signals signalsCp = signals;
+    Signals signalsCp = signalStorage.getSignals();
 
     quickSort(&signalsCp.arr[0], &signalsCp.arr[PASSWORD_LENGTH-1]);
 
