@@ -22,6 +22,6 @@ void SignalStorage::push(unsigned int value) {
   }
 }
 
-Signals SignalStorage::getSignals() {
+Signals& SignalStorage::getSignals() {
   return signals;
 }

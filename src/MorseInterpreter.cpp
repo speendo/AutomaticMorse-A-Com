@@ -3,6 +3,7 @@
 #include "SignalStorage.hpp"
 #include "InputSignal.hpp"
 #include <limits.h>
+#include <Arduino.h>
 
 void MorseInterpreter::setup() {
   reset();
@@ -74,11 +75,6 @@ unsigned int MorseInterpreter::getDitCount() {
 }
 
 unsigned int MorseInterpreter::getAvSignalLength(unsigned int ditCount) {
-  // make a copy
-  Signals signalsCp = signalStorage.getSignals();
-
-  quickSort(&signalsCp.arr[0], &signalsCp.arr[PASSWORD_LENGTH-1]);
-
   // generate a border between dits and dahs in user input
   unsigned int avSignalLength;
 
@@ -89,48 +85,60 @@ unsigned int MorseInterpreter::getAvSignalLength(unsigned int ditCount) {
     avSignalLength = UINT_MAX;
   }
   else {
-    // in fact a password should always consist of dits AND dahs, therefore the 2 possibilities above should never be true
+    Signals& signals = signalStorage.getSignals(); // can I use a reference here?
 
-    // get average dit length
-    unsigned int avDit = 0;
-    for (unsigned int i = 0; i < ditCount; i++) {
-      avDit = avDit + signalsCp.arr[i];
-    }
-    avDit = avDit / ditCount;
+    unsigned int lastDit = 0;
+    unsigned int lastDah = UINT_MAX;
 
-    // get average dah length
-    unsigned int avDah = 0;
-    for (unsigned int i = ditCount; i < PASSWORD_LENGTH; i++) {
-      avDah = avDah + signalsCp.arr[i];
+    unsigned int curDit;
+    unsigned int curDah;
+
+    unsigned int sumDit = 0;
+    unsigned int sumDah = 0;
+
+    unsigned int value;
+
+    // Iterate ditCount or dahCount times (depends on what is higher)
+    for (unsigned int i = 0; i < max(ditCount, (PASSWORD_LENGTH - ditCount)); i++) {
+      curDit = UINT_MAX;
+      curDah = 0;
+
+      // Iterate over signals
+      for (unsigned int j = 0; j < PASSWORD_LENGTH; j++) {
+        value = signals.arr[j];
+
+        // Build sum of DITs
+        if (i < ditCount) {
+          if (value > lastDit && value < curDit) {
+            curDit = value;
+          }
+        } else {
+          // don't add anything to sumDit
+          curDit = 0;
+        }
+
+        // Build sum of DAHs
+        if (i < (PASSWORD_LENGTH - ditCount)) {
+          if (value < lastDah && value > curDah) {
+            curDah = value;
+          }
+        } else {
+          // don't add anything to sumDah
+          curDah = 0;
+        }
+      }
+      sumDit += curDit;
+      sumDah += curDah;
+
+      lastDit = curDit;
+      lastDah = curDah;
     }
-    avDah = avDah / PASSWORD_LENGTH - ditCount;
+
+    unsigned int avDit = sumDit / ditCount;
+    unsigned int avDah = sumDah / (PASSWORD_LENGTH - ditCount);
 
     // calculate border between dit and dah in user input
     avSignalLength = (avDit + avDah) / 2;
   }
   return avSignalLength;
-}
-
-void MorseInterpreter::quickSort(unsigned int *begin, unsigned int *end) {
-  unsigned int *ptr;
-  unsigned int *split;
-  if (end - begin <= 1)
-  return;
-  ptr = begin;
-  split = begin + 1;
-  while (++ptr != end) {
-    if (*ptr < *begin) {
-      swap(ptr, split);
-      ++split;
-    }
-  }
-  swap(begin, split - 1);
-  quickSort(begin, split - 1);
-  quickSort(split, end);
-}
-
-void MorseInterpreter::swap(unsigned int *a, unsigned int *b) {
-  unsigned int tmp = *a;
-  *a = *b;
-  *b = tmp;
 }

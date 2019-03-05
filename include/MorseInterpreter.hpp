@@ -32,8 +32,6 @@ private:
   MorsePW getInputPW();
   unsigned int getDitCount();
   unsigned int getAvSignalLength(unsigned int ditCount);
-  void quickSort(unsigned int *begin, unsigned int *end);
-  void swap(unsigned int *a, unsigned int *b);
 };
 
 #endif

@@ -13,7 +13,7 @@ public:
   void reset();
   bool full();
   void push(unsigned int value);
-  Signals getSignals();
+  Signals& getSignals();
 
 };
 
