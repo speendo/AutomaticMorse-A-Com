@@ -6,23 +6,28 @@
 #include "InputSignal.hpp"
 
 class MorseInterpreter {
-
-public:
-  MorseInterpreter(float ditDahThreshold, InputSignal& inputSignal, SignalStorage& signalStorage);
-  void setup();
-  void loop();
-  void reset();
-  bool getPasswordCorrect();
-  bool getCheckFinished();
-
-private:
   const float ditDahThreshold;
   InputSignal& inputSignal;
   SignalStorage& signalStorage;
 
-  bool passwordCorrect;
   bool checkFinished;
+  bool passwordCorrect;
 
+public:
+  MorseInterpreter(float ditDahThreshold, InputSignal& inputSignal, SignalStorage& signalStorage) :
+    ditDahThreshold(ditDahThreshold),
+    inputSignal(inputSignal),
+    signalStorage(signalStorage)
+  {
+  }
+
+  void setup();
+  void loop();
+  void reset();
+  bool getCheckFinished();
+  bool getPasswordCorrect();
+
+private:
   void comparePW();
   MorsePW getInputPW();
   unsigned int getDitCount();

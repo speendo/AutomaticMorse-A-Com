@@ -4,15 +4,6 @@
 #include "SignalStorage.hpp"
 
 class InputSignal {
-public:
-  InputSignal(unsigned int waitMs, unsigned int minEventMs, unsigned int maxSigMs, SignalStorage& signalStorage);
-  void setup();
-  void loop();
-  void reset();
-  bool getError();
-  bool getFinished();
-
-protected:
   const unsigned int waitMs;
   const unsigned int minEventMs;
   const unsigned int maxSigMs;
@@ -27,9 +18,26 @@ protected:
 
   unsigned long lastEventMs;
 
-  SignalStorage signalStorage;
+  SignalStorage& signalStorage;
 
+public:
+  InputSignal(unsigned int waitMs, unsigned int minEventMs, unsigned int maxSigMs, SignalStorage& signalStorage) :
+  waitMs(waitMs),
+  minEventMs(minEventMs),
+  maxSigMs(maxSigMs),
+  signalStorage(signalStorage)
+  {
+  }
+
+  void setup();
+  void loop();
+  void reset();
+  bool getError();
+  bool getFinished();
+
+protected:
   bool getSmoothSignal();
-  virtual bool getSignal();
+  virtual bool getSignal() = 0; // Abstract method, has to be overridden by derived class
+
 };
 #endif

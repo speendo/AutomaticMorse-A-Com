@@ -1,118 +1,85 @@
+#include "OutputInterface.hpp"
 #include <Arduino.h>
 
-class OutputInterface {
-  const int pin;
+void OutputInterface::setup() {
+  pinMode(pin, OUTPUT);
+  state = WAITING;
+  blockActions = false;
+}
 
-  const unsigned long grantMs;
-  const unsigned long rndGrantMS;
-  const unsigned long denyMs;
-  const unsigned long minApproachMs;
-  const unsigned long rndApproachMs;
+void OutputInterface::loop() {
+  switch (state) {
+    case WAITING:
+      wait();
+      break;
+    case APPROACHING:
+      approach();
+      break;
+    case GRANTING:
+      grant();
+      break;
+    case DENYING:
+      deny();
+      break;
+  }
+}
 
-  unsigned long actionStartMs;
-  unsigned long actionRandomMs;
-  bool blockActions;
+void OutputInterface::setGrant() {
+  state = APPROACHING; // because of the "humanizers" - a human would have to approach the intercom before opening
+  blockActions = true;
+  actionRandomMs = random(rndApproachMs);
+  setActionStartMs();
+}
 
-  enum State {
-    WAITING = 0,
-    APPROACHING = 1,
-    GRANTING = 2,
-    DENYING = 3
-  } state;
+void OutputInterface::setDeny() {
+  state = DENYING;
+  blockActions = true;
+  setActionStartMs();
+}
 
-public:
-  OutputInterface(int attachTo, unsigned long grantMs, unsigned long denyMs=0, unsigned long minApproachMs=0, unsigned long rndApproachMs=0, unsigned long rndGrantMS=0) :
-  pin(attachTo),
-  grantMs(grantMs),
-  rndGrantMS(rndGrantMS),
-  denyMs(denyMs),
-  minApproachMs(minApproachMs),
-  rndApproachMs(rndApproachMs)
-  {
-  };
+bool OutputInterface::actionsBlocked() {
+  return blockActions;
+}
 
+void OutputInterface::wait() {
+  blockActions = false;
+  defaultPinAction();
+}
 
-  void setup() {
-    pinMode(pin, OUTPUT);
+void OutputInterface::approach() {
+  defaultPinAction();
+  if (millis() - actionStartMs > minApproachMs + actionRandomMs) {
+    state = GRANTING;
+    actionRandomMs = random(rndGrantMS);
+    setActionStartMs();
+  }
+}
+
+void OutputInterface::grant() {
+  if (millis() - actionStartMs > grantMs) {
     state = WAITING;
-    blockActions = false;
-  }
-
-  void loop() {
-    switch (state) {
-      case WAITING:
-        wait();
-        break;
-      case APPROACHING:
-        approach();
-        break;
-      case GRANTING:
-        grant();
-        break;
-      case DENYING:
-        deny();
-        break;
-    }
-  }
-
-  void setGrant() {
-    state = APPROACHING; // because of the "humanizers" - a human would have to approach the intercom before opening
-    blockActions = true;
-    actionRandomMs = random(rndApproachMs);
-    setActionStartMs();
-  }
-
-  void setDeny() {
-    state = DENYING;
-    blockActions = true;
-    setActionStartMs();
-  }
-
-  bool actionsBlocked() {
-    return blockActions;
-  }
-
-private:
-  void wait() {
-    blockActions = false;
     defaultPinAction();
+  } else {
+    grantingPinAction();
   }
+}
 
-  void approach() {
-    defaultPinAction();
-    if (millis() - actionStartMs > minApproachMs + actionRandomMs) {
-      state = GRANTING;
-      actionRandomMs = random(rndGrantMS);
-      setActionStartMs();
-    }
+void OutputInterface::deny() {
+  defaultPinAction();
+
+  if (millis() - actionStartMs > denyMs) {
+    state = WAITING;
   }
+}
 
-  void grant() {
-    if (millis() - actionStartMs > grantMs) {
-      state = WAITING;
-      defaultPinAction();
-    } else {
-      grantingPinAction();
-    }
-  }
+void OutputInterface::setActionStartMs() {
+  actionStartMs = millis();
+}
 
-  void deny() {
-    defaultPinAction();
+void OutputInterface::defaultPinAction() { // should be called in any state, just to make sure nothing bad happens
+  digitalWrite(pin, LOW);
+}
 
-    if (millis() - actionStartMs > denyMs) {
-      state = WAITING;
-    }
-  }
-
-  void setActionStartMs() {
-    actionStartMs = millis();
-  }
-
-  void defaultPinAction() { // should be called in any state, just to make sure nothing bad happens
-    digitalWrite(pin, LOW);
-  }
-
-  void grantingPinAction() {
-    digitalWrite(pin, HIGH);
-  }
-};
+void OutputInterface::grantingPinAction() {
+  digitalWrite(pin, HIGH);
+}

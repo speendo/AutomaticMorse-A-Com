@@ -4,13 +4,19 @@
 #include "InputSignal.hpp"
 
 class SimplePinInputSignal : public InputSignal {
-  public:
-    SimplePinInputSignal(unsigned int waitMs, unsigned int minEventMs, unsigned int maxSigMs, int attachTo, SignalStorage signalStorage);
-  protected:
-    bool getSignal();
+  const int pin;
 
-  private:
-    const int pin;
+public:
+  SimplePinInputSignal(unsigned int waitMs, unsigned int minEventMs, unsigned int maxSigMs, int attachTo, SignalStorage signalStorage) :
+    InputSignal(waitMs, minEventMs, maxSigMs, signalStorage),
+    pin(attachTo)
+    {
+    }
+
+  void setup();
+
+protected:
+  bool getSignal();
 };
 
 #endif

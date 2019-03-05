@@ -2,15 +2,6 @@
 #define OutputInterface_hpp
 
 class OutputInterface {
-public:
-  OutputInterface(int attachTo, unsigned long grantMs, unsigned long denyMs=0, unsigned long minApproachMs=0, unsigned long rndApproachMs=0, unsigned long rndGrantMS=0);
-  void setup();
-  void loop();
-  void setGrant();
-  void setDeny();
-  bool actionsBlocked();
-
-private:
   const int pin;
 
   const unsigned long grantMs;
@@ -23,6 +14,32 @@ private:
   unsigned long actionRandomMs;
   bool blockActions;
 
+  enum State {
+    WAITING = 0,
+    APPROACHING = 1,
+    GRANTING = 2,
+    DENYING = 3
+  } state;
+
+public:
+  OutputInterface(int attachTo, unsigned long grantMs, unsigned long denyMs=0, unsigned long minApproachMs=0, unsigned long rndApproachMs=0, unsigned long rndGrantMS=0) :
+  pin(attachTo),
+  grantMs(grantMs),
+  rndGrantMS(rndGrantMS),
+  denyMs(denyMs),
+  minApproachMs(minApproachMs),
+  rndApproachMs(rndApproachMs)
+  {
+  };
+
+public:
+  void setup();
+  void loop();
+  void setGrant();
+  void setDeny();
+  bool actionsBlocked();
+
+private:
   void wait();
   void approach();
   void grant();
@@ -31,5 +48,6 @@ private:
   void defaultPinAction();
   void grantingPinAction();
 };
+
 
 #endif

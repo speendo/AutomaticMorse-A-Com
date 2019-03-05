@@ -4,16 +4,17 @@
 #include "AutomaticMorseACom.hpp"
 
 class SignalStorage {
-public:
-  SignalStorage();
-  void reset();
-  bool full();
-  void push(unsigned int);
-  Signals getSignals();
-
-private:
   Signals signals;
   unsigned int current;
+
+public:
+  SignalStorage();
+
+  void reset();
+  bool full();
+  void push(unsigned int value);
+  Signals getSignals();
+
 };
 
 #endif

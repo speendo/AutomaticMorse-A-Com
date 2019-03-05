@@ -8,7 +8,7 @@
 
 SignalStorage signalStorage = SignalStorage();
 
-InputSignal input = SimplePinInputSignal(2000, 100, 3000, 4, signalStorage);
+SimplePinInputSignal input = SimplePinInputSignal(2000, 100, 3000, 4, signalStorage);
 
 MorseInterpreter morseInterpreter = MorseInterpreter(30, input, signalStorage);
 
