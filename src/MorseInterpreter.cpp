@@ -60,7 +60,6 @@ MorsePW MorseInterpreter::getInputPW() {
       returnPW.arr[i] = EMPTY;
     }
   }
-
   return returnPW;
 }
 
@@ -87,58 +86,69 @@ unsigned int MorseInterpreter::getAvSignalLength(unsigned int ditCount) {
   else {
     Signals& signals = signalStorage.getSignals(); // can I use a reference here?
 
-    unsigned int lastDit = 0;
-    unsigned int lastDah = UINT_MAX;
-
-    unsigned int curDit;
-    unsigned int curDah;
-
-    unsigned int sumDit = 0;
-    unsigned int sumDah = 0;
-
-    unsigned int value;
-
-    // Iterate ditCount or dahCount times (depends on what is higher)
-    for (unsigned int i = 0; i < max(ditCount, (PASSWORD_LENGTH - ditCount)); i++) {
-      curDit = UINT_MAX;
-      curDah = 0;
-
-      // Iterate over signals
-      for (unsigned int j = 0; j < PASSWORD_LENGTH; j++) {
-        value = signals.arr[j];
-
-        // Build sum of DITs
-        if (i < ditCount) {
-          if (value > lastDit && value < curDit) {
-            curDit = value;
-          }
-        } else {
-          // don't add anything to sumDit
-          curDit = 0;
-        }
-
-        // Build sum of DAHs
-        if (i < (PASSWORD_LENGTH - ditCount)) {
-          if (value < lastDah && value > curDah) {
-            curDah = value;
-          }
-        } else {
-          // don't add anything to sumDah
-          curDah = 0;
-        }
-      }
-      sumDit += curDit;
-      sumDah += curDah;
-
-      lastDit = curDit;
-      lastDah = curDah;
+    bool used[PASSWORD_LENGTH];
+    for (unsigned int i = 0; i < PASSWORD_LENGTH; i++) {
+      used[i] = false;
     }
 
-    unsigned int avDit = sumDit / ditCount;
-    unsigned int avDah = sumDah / (PASSWORD_LENGTH - ditCount);
+    unsigned int sumDit;
+    unsigned int sumDah;
+
+    unsigned int curSignal;
+    int curIndex;
+
+    unsigned int dahCount = PASSWORD_LENGTH - ditCount;
+
+    if (ditCount < dahCount) {
+      // Count DITs first
+      for (unsigned int i = 0; i < ditCount; i++) {
+        curSignal = UINT_MAX;
+        curIndex = -1;
+        for (unsigned int j = 0; j < PASSWORD_LENGTH; j++) {
+          // only consider unused signals
+          if (!used[j]) {
+            if (signals.arr[j] < curSignal) {
+              curSignal = signals.arr[j];
+              curIndex = j;
+            }
+          }
+        }
+        sumDit += curSignal;
+        used[curIndex] = true;
+      }
+      // finally sum up DAHs
+      for (unsigned int i = 0; i < PASSWORD_LENGTH; i++) {
+        if (!used[i]) {
+          sumDah += signals.arr[i];
+        }
+      }
+    } else {
+      // Count DAHs first
+      for (unsigned int i = 0; i < dahCount; i++) {
+        curSignal = 0;
+        curIndex = -1;
+        for (unsigned int j = 0; j < PASSWORD_LENGTH; j++) {
+          // only consider unused signals
+          if (!used[j]) {
+            if (signals.arr[j] > curSignal) {
+              curSignal = signals.arr[j];
+              curIndex = j;
+            }
+          }
+        }
+        sumDah += curSignal;
+        used[curIndex] = true;
+      }
+      // finally sum up DAHs
+      for (unsigned int i = 0; i < PASSWORD_LENGTH; i++) {
+        if (!used[i]) {
+          sumDit += signals.arr[i];
+        }
+      }
+    }
 
     // calculate border between dit and dah in user input
-    avSignalLength = (avDit + avDah) / 2;
+    avSignalLength = (sumDit/ditCount + sumDah/(PASSWORD_LENGTH - ditCount)) / 2;
   }
   return avSignalLength;
 }
